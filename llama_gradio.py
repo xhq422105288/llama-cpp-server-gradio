@@ -39,7 +39,8 @@ def reset_chat():
 # Gradio 前端
 with gr.Blocks() as demo:
     gr.Markdown("## TinyLlama 中文助手（CPU 版）")
-    chatbot = gr.Chatbot()
+    # chatbot = gr.Chatbot()
+    chatbot = gr.Chatbot(type="messages")   # <- 这里指定 type
     txt = gr.Textbox(show_label=False, placeholder="输入中文问题，回车发送")
     with gr.Row():
         send_btn = gr.Button("发送")
