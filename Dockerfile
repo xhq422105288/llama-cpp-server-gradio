@@ -1,0 +1,35 @@
+FROM python:3.13-slim-bullseye
+
+ENV SERVER_DIR=/var/lib/llama
+RUN mkdir -p $SERVER_DIR
+
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y \
+        python3 \
+        python3-pip \
+        build-essential \
+        && \
+    python3 -m pip install --upgrade pip
+
+COPY requirements-deps.txt $SERVER_DIR
+RUN pip3 install -r $SERVER_DIR/requirements-deps.txt
+
+RUN apt-get install -y \
+        libopenblas-dev \
+        pkg-config \
+        && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt $SERVER_DIR
+RUN CMAKE_CXX_FLAGS=-pthread pip3 install -r $SERVER_DIR/requirements.txt --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
+# Set environment variable for the host
+ENV HOST=0.0.0.0
+ENV PORT=8000
+
+EXPOSE ${PORT}
+RUN pip3 install gradio
+
+WORKDIR /app
+COPY llama_gradio.py llama_gradio.py
+ENTRYPOINT ["python3", "llama_gradio.py"]
